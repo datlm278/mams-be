@@ -18,10 +18,11 @@ public class ImportInvoiceMapper {
     public static ImportInvoiceResponse toDto(ImportInvoice entity) {
         ImportInvoiceResponse response = new ImportInvoiceResponse();
         response.setId(entity.getId());
-        response.setEmployeeId(entity.getEmployee().getId());
-        response.setEmployeeName(entity.getEmployee().getFullName());
-        response.setSupplierId(entity.getSupplier().getId());
-        response.setSupplierName(entity.getSupplier().getFullName());
+//        response.setEmployeeId(entity.getEmployee().getId());
+//        response.setEmployeeName(entity.getEmployee().getFullName());
+//        response.setSupplierId(entity.getSupplier().getId());
+//        response.setSupplierName(entity.getSupplier().getFullName());
+        response.setTotalPrice(entity.getTotalPrice());
         response.setStatus(entity.getStatus());
         response.setCreateTime(entity.getCreateTime());
         response.setUpdateTime(entity.getUpdateTime());

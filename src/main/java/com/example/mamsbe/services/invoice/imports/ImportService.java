@@ -32,7 +32,7 @@ public class ImportService implements IImportService {
     @Autowired
     public ImportService(ImportInvoiceDetailRepository importInvoiceDetailRepository,
                          ImportInvoiceRepository importInvoiceRepository,
-                         MotorbikeRepository motorbikeRepository, ModelMapper modelMapper) {
+                         MotorbikeRepository motorbikeRepository) {
         this.importInvoiceDetailRepository = importInvoiceDetailRepository;
         this.importInvoiceRepository = importInvoiceRepository;
         this.motorbikeRepository = motorbikeRepository;
@@ -43,6 +43,13 @@ public class ImportService implements IImportService {
 
         ImportInvoice invoice = importInvoiceRepository.findByCode(request.getCode());
         Motorbike motorbike = motorbikeRepository.findById(request.getMotorbikeId()).orElseThrow();
+
+        if (!ObjectUtils.isEmpty(invoice)) {
+            if (invoice.getStatus().equals(MAMSConstant.DELETE_STATUS)) {
+                throw new RuntimeException("import invoice was deleted");
+            }
+        }
+
         if (ObjectUtils.isEmpty(invoice)) {
             ImportInvoice importInvoice = ImportInvoiceMapper.toEntity(request);
             ImportInvoiceDetail importInvoiceDetail = ImportInvoiceDetailMapper.toEntity(request);
@@ -89,14 +96,22 @@ public class ImportService implements IImportService {
     public void deleteImportInvoice(Long id) {
         ImportInvoice importInvoice = importInvoiceRepository.findById(id).orElseThrow();
 
+        if (!ObjectUtils.isEmpty(importInvoice)) {
+            if (importInvoice.getStatus().equals(MAMSConstant.DELETE_STATUS)) {
+                throw new RuntimeException("import invoice was deleted");
+            }
+        }
+
         List<ImportInvoiceDetail> importInvoiceDetailList = importInvoiceDetailRepository.findByCode(importInvoice.getCode());
 
         for (ImportInvoiceDetail detail: importInvoiceDetailList) {
             detail.setStatus(MAMSConstant.DELETE_STATUS);
+            detail.setUpdateTime(Timestamp.from(Instant.now()));
             importInvoiceDetailRepository.save(detail);
         }
 
         importInvoice.setStatus(MAMSConstant.DELETE_STATUS);
+        importInvoice.setUpdateTime(Timestamp.from(Instant.now()));
         importInvoiceRepository.save(importInvoice);
     }
 }
